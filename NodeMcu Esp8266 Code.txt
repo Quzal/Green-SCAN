@@ -1,0 +1,69 @@
+#include<ESP8266WiFi.h>
+WiFiClient client;
+const char* ssid     = "ayyaz";
+const char* password = "12345678";
+int dat;
+char server[] = "www.quzalmehmood.com"; 
+void setup() {
+  // put your setup code here, to run once:
+Serial.begin(115200);
+  delay(10);
+pinMode(LED_BUILTIN,OUTPUT);
+pinMode(A0,INPUT);
+  // We start by connecting to a WiFi network
+
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.mode(WIFI_STA);
+  WiFi.persistent(false);
+  WiFi.begin(ssid,password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(250);
+    Serial.print(".");
+    digitalWrite(LED_BUILTIN,HIGH);
+    delay(250);
+    digitalWrite(LED_BUILTIN,LOW);
+  }
+  if(WiFi.status()==WL_CONNECTED){
+ Serial.print(WiFi.localIP());
+  digitalWrite(LED_BUILTIN,LOW);
+    
+  }
+ 
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+ // Connect to the server (your computer or web page)  
+
+ 
+  if (client.connect(server, 80)) {
+    while(client.connect(server, 80)){
+       dat=analogRead(A0);
+       Serial.println("Connected to Quzal");
+    client.print("GET /nasaSpace.php/sensorOne?"); // This
+    client.print("value="); // This
+    client.print(dat); // And this is what we did in the testing section above. We are making a GET request just like we would from our browser but now with live data from the sensor
+  Serial.println(dat);
+    client.println(" HTTP/1.1"); // Part of the GET request
+    client.println("Host: www.quzalmehmood.com"); // IMPORTANT: If you are using XAMPP you will have to find out the IP address of your computer and put it here (it is explained in previous article). If you have a web page, enter its address (ie.Host: "www.yourwebpage.com")
+    client.println("Connection: close"); // Part of the GET request telling the server that we are over transmitting the message
+    client.println(); // Empty line
+    client.println(); // Empty line
+    client.stop();    // Closing connection to server
+    }
+   
+   
+
+  }
+
+  else {
+    // If Arduino can't connect to the server (your computer or web page)
+    Serial.println("--> connection failed\n");
+  }
+ 
+  // Give the server some time to recieve the data and store it. I used 10 seconds here. Be advised when delaying. If u use a short delay, the server might not capture data because of Arduino transmitting new data too soon.
+  delay(4000);
+}
